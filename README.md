@@ -7,7 +7,7 @@ bamazonCustomer.js:
   customer can view the inventory, select the desired item, select a quantity, verify the price, and if accepted can purchase it.
   this will decriment the quantity purchased from the server value, and reflect it onscreen.
  
- bamazonManager.js:
+ bamazonManager.js:<\n>
   has a menu function that runs many various commands:
     View products for sale - similar to the customer menu, except it is called as a menu item instead of automatically appearing.
     View low stock products - will show all products that have less than a value of 5 in the quantity section
