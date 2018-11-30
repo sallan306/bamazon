@@ -15,145 +15,167 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
     if (err) {throw err};
     console.log(`onnected as id ${connection.threadId} \n`);
-    mainPrompt();
+    start();
 });
 //---------------------------------functions-------------------------------------//
 
-const action = process.argv[2];
+// const action = process.argv[2];
 const divider = `------------------------------------------------------------`;
-var postName = "",
-    postDepartment = "",
-    bidAmount = 0;
+var newItemName = "",
+    newItemDepartment = "",
+    newItemQuantity = "",
+    newItemPrice = 0;
 //------------------------------------------------FUNCTIONS-------------------------------------------//
-//PLACING BID, UPDATES ITEM's CURRENT BID
-function bid(id, bidAmmount){
-  connection.query("UPDATE products SET ? WHERE ?"), [
-    {
-      bid: bidAmmount
-    },
-    {
-      id: id
-    }
-  ],function(err, result){
-    if (err) throw err;
-    console.log("Posting a bid");
-  }
-}
-//LISTING NEW AUCTION, INJECTS USER INPUT INTO DATABASE
-function postAuction(name, department, bid){
+
+//INJECTS USER INPUT INTO DATABASE
+function addProduct(item, department, quantity, price){
   connection.query("INSERT INTO products SET ?",
     [
       {
-        name,
+        item,
         department,
-        bid
+        quantity,
+        price,
       }
-    ], function(err, result){
+    ], function(err, response){
       console.log("NEW THING LISTED");
     });
 };
-//RETURNS ALL AUCTIONS FROM DATABASE
-function listAllAuctions(){
+//RETURNS ALL PRODUCTS FROM DATABASE
+function listAllProducts(){
   connection.query("SELECT * FROM products", function(err, res) {
     if (err) throw err;
     
     console.log(divider);
     res.forEach(element => {
       console.log(
-      `${elemenbt.id}--${element.name}, : $${element.bid}`);
+      `${element.id}--${element.item}, : $${element.department}, : $${element.quantity}, : $${element.price}`);
+    });
+    console.log(divider);
+    start();
+  });
+}
+//list products that have a quantity less than 5
+function listLowStockProducts(){
+  connection.query("SELECT * FROM products", function(err, res) {
+    if (err) throw err;
+    
+    console.log(divider);
+    res.forEach(element => {
+      console.log(
+      `${element.id}--${element.item}, : $${element.department}, : $${element.quantity}, : $${element.price}`);
     });
     console.log(divider);
     mainPrompt();
   });
 }
+//exit the application
 function exiteBoy(){
   console.log("BYEEEEEEEEE")
   connection.end();
 }
 //---------------------------------------------INQUIRER FUNCTIONS ----------------------------------------------------------------------//
-function mainPrompt() {
+
+//Opening function that begins by asking the user for the choices below
+function start() {
   inquirer.prompt([
     {
       type: "list",
       name: "UserChoicePrompt",
       message: "What would you like to do?",
-      choices: ["Bid","List Auction Items","Post Auction Item","Exit"]
+      choices: ["View Products for Sale",
+                "View Low Inventory",
+                "Add to Inventory",
+                "Add New Product",
+                "Exit"]
     }
   ]).then(function(user) {
     const userC = user.UserChoicePrompt;
-    if (userC === "Bid") {
-      // Auction selection?
-      // bid
+    if (userC === "View Products for Sale") {
+      listAllProducts();
     }
-    else if (userC === "List Auction Items") {
-      listAllAuctions();
+    else if (userC === "View Low Inventory") {
+      listLowStockProducts();//-----------------------make a new function that only displays low inventory items
     }
-    else if (userC === "Post Auction Item") {
-      postNamePrompt();
+    else if (userC === "Add to Inventory") {
+      chooseBidPrompt()//-------------------------------function should select an item and "restock" it
     }
+    else if (userC === "Add New Product") {
+      postNamePrompt()
+    }   
     else if (userC === "Exit") {
       exiteBoy();
     }        
   });
 }
-function postNamePrompt() {
+function addNewProductName() {
   inquirer.prompt([
     {
       type: "input",
-      name: "postNamePrompt",
+      name: "inquireItem",
       message: "What would you like to sell?"
     }
   ]).then(function(user) {
     
-    postName = user.postNamePrompt
-    postDepartmentPrompt()
+    newItemName = user.inquireItem
+    addNewProductDepartment()
   });
 }
-function postDepartmentPrompt() {
+function addNewProductDepartment() {
   inquirer.prompt([
     {
       type: "input",
-      name: "postDepartmentPrompt",
+      name: "inquireDepartment",
       message: "What department would you like to sell in?"
     }
   ]).then(function(user) {
-    postDepartment = user.postDepartmentPrompt
-    bidAmountPrompt()
+    newItemDepartment = user.inquireDepartment
+    addNewProductQuantity()
   });
 }
-function bidAmountPrompt() {
+function addNewProductQuantity() {
   inquirer.prompt([
     {
       type: "input",
-      name: "bidAmountPrompt",
+      name: "inquireQuantity",
+      message: "How many?"
+    }
+  ]).then(function(user) {
+    newItemQuantity = user.inquireQuantity
+    addNewProductPrice()
+  });
+}
+function addNewProductPrice() {
+  inquirer.prompt([
+    {
+      type: "input",
+      name: "inquirePrice",
       message: "How much would you like to bid?"
     }
   ]).then(function(user) {
-    bidAmount = parseInt(user.bidAmountPrompt);
-    postAuction(name, department, bid);
-    listAllAuctions();
-    mainPrompt();
+    newItemPrice = parseInt(user.inquirePrice);
+    addProduct(newItemName, newItemDepartment, newItemQuantity, newItemPrice);
+    start();
   });
 }
-// function chooseBidPrompt() {
-//   // connection.query("SELECT * FROM items", function(err, res) {
-//   //   if (err) throw err;
+function chooseBidPrompt() {
+  // connection.query("SELECT * FROM items", function(err, res) {
+  //   if (err) throw err;
     
-//   //   console.log(divider);
-//   //   res.forEach(element => {
-//   //     console.log();
-//   //   });
-//   var products = connection.query("SELECT * FROM products",function(err, res){
+  //   console.log(divider);
+  //   res.forEach(element => {
+  //     console.log();
+  //   });
+  var products = connection.query("SELECT * FROM products",function(err, res){
     
-//   })
-// }
+  })
     
   
   inquirer.prompt([
     {
       type: "list",
       name: "itemToBidPrompt",
-      message: "What would you like to do?",
+      message: "Select an Item",
       choices: [products,"Exit"]
     }
   ]).then(function(user) {

@@ -1,15 +1,19 @@
 DROP DATABASE IF EXISTS bamazon_db;
 CREATE DATABASE bamazon_db;
-USE bamazon_db;
+USE bamazon_db	;
 
 CREATE TABLE products(
 
     position INTEGER(11) NOT NULL ,
-    item VARCHAR (75),
+    item VARCHAR (75) NOT NULL,
     department VARCHAR (50) NOT NULL,
-    bid INTEGER(4) NULL,         
+    quantity INTEGER(11) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,         
     PRIMARY KEY (position)
 );
+
+INSERT INTO products (item, department, quantity, price)
+VALUES ("socks", "clothing", 4, 5.20);
 
 SELECT * FROM products;
 -- SELECT * FROM top5000Songs WHERE artist = "Psy";
