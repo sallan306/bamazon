@@ -24,3 +24,5 @@ VALUES 	("socks", "clothing", 1, 4.95),
 
 SELECT * FROM products;
 SELECT * FROM products WHERE quantity < 5;
+SELECT quantity FROM products WHERE item = "books";
+UPDATE products SET products.quantity = 10 WHERE products.item = "books";
