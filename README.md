@@ -16,8 +16,8 @@ bamazonCustomer.js:
     Add new product - the manager can add a new product with the following prompted questions: name, department, quantity, and price.
     this new product is reflected in the server.
 
-[[https://github.com/sallan306/bamazon/blob/master/CustomerExample_1.png|alt=example1]]
-[[https://github.com/sallan306/bamazon/blob/master/CustomerExample_2.png|alt=example1]]
-[[https://github.com/sallan306/bamazon/blob/master/ManagerExample_1.png|alt=example1]]
-[[https://github.com/sallan306/bamazon/blob/master/ManagerExample_2.png|alt=example1]]
-[[https://github.com/sallan306/bamazon/blob/master/ManagerExample_3.png|alt=example1]]
+[https://github.com/sallan306/bamazon/blob/master/CustomerExample_1.png]
+[https://github.com/sallan306/bamazon/blob/master/CustomerExample_2.png]
+[https://github.com/sallan306/bamazon/blob/master/ManagerExample_1.png]
+[https://github.com/sallan306/bamazon/blob/master/ManagerExample_2.png]
+[https://github.com/sallan306/bamazon/blob/master/ManagerExample_3.png]
