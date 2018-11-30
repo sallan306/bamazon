@@ -16,55 +16,80 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
     if (err) {throw err};
     console.log(`onnected as id ${connection.threadId} \n`);
-    mainMenu();
+    listAllProducts();
 });
 //---------------------------------VARIABLES/CONSTANTS-------------------------------------//
 const divider = ` -----------------------------------------------------------------------------`,
       CLIconfig = { width: 100, filler: '.', paddingLeft: ' | ' , paddingRight: ' | '},
       header = cliFormat.columns.wrap(["NAME","DEPARTMENT","QUANTITY","PRICE"], CLIconfig)
-var newItemName = "",
-    newItemDepartment = "",
-    newItemQuantity = "",
-    newItemPrice = 0;
-//------------------------------------------------FUNCTIONS-------------------------------------------//
 
-//Opening function that begins by asking the user for the choices below
-function mainMenu() {
-  inquirer.prompt([{  type: "list",
-                      name: "UserChoicePrompt",
-                      message: "What would you like to do?",
-                      choices: ["View Products for Sale",
-                                "View Low Inventory",
-                                "Add to Inventory (NOT FINISHED)" ,
-                                "Add New Product",
-                                "Exit"]}
-  ]).then(function(user) {
-    const userC = user.UserChoicePrompt;
-    if      (userC === "View Products for Sale")                  {listAllProducts()}
-    else if (userC === "View Low Inventory")                      {listLowStockProducts()}
-    else if (userC === "Add to Inventory (NOT FINISHED)")         {addToInventory()} // NOT DONE
-    else if (userC === "Add New Product")                         {makeNewProduct()}   
-    else if (userC === "Exit")                                    {quit()}        
-  });
-}
+//------------------------------------------------FUNCTIONS-------------------------------------------//
 
 //RETURNS ALL PRODUCTS FROM DATABASE
 function listAllProducts(){
-  connection.query("SELECT * FROM products", function(err, res) {
-    if (err) throw err;
-    var result = ''
+    connection.query("SELECT * FROM products", function(err, res) {
+      if (err) throw err;
+      var result = ''
+  
+      res.forEach(element => {
+            var price = element.price.toLocaleString("en-GB", {style: "currency", currency: "USD", minimumFractionDigits: 2})
+            result += cliFormat.columns.wrap([element.item,element.department,element.quantity.toString(),price], CLIconfig) + "\n";
+          })
+      console.log(header);
+      console.log(divider);
+      console.log(result);
+      console.log(divider);
+      whatProductToBuy()
+    });
+  }
 
-    res.forEach(element => {
-          var price = element.price.toLocaleString("en-GB", {style: "currency", currency: "USD", minimumFractionDigits: 2})
-          result += cliFormat.columns.wrap([element.item,element.department,element.quantity.toString(),price], CLIconfig) + "\n";
+function whatProductToBuy(){
+    inquirer.prompt([{  type: "input",
+    name: "inquireItem",
+    message: "Which item would you like to buy?"},
+
+    {type: "input",
+    name: "inquireQuantity",
+    message: "How many would you like to buy?"}
+    ]).then(function(response) {
+        var sum = 0;
+        connection.query("SELECT quantity, price FROM products WHERE item = '"+response.inquireItem+"'", function(err,result) {
+            sum = result[0].quantity - parseInt(response.inquireQuantity)
+            
+            if (sum >= 0) {
+                var cost = response.inquireQuantity * result[0].price
+                var tempItem = response.inquireItem
+                inquirer.prompt([{  type: "confirm",
+                name: "inquireDecision",
+                message: "cost is: " + cost.toLocaleString("en-GB", {style: "currency", currency: "USD", minimumFractionDigits: 2}) + ". Do you accept?"
+                }]).then(function(response){
+                    if (response.inquireDecision) {
+                        console.log("sum: "+sum)
+                        var query = "UPDATE products SET products.quantity = "+sum+" WHERE products.item = '"+tempItem+"'"
+                        connection.query(query, function(err,result){})
+                        console.log("Purchased, thank you!")
+                        setTimeout(listAllProducts,800)
+                    }
+                    else {
+                        console.log("returning to the main menu...")
+                        setTimeout(listAllProducts,800)
+                    }
+                })
+                
+                
+            }
+            else {
+                console.log("I'm sorry, we do not have enough in stock, please try again later")
+                setTimeout(listAllProducts,800)
+            }
         })
-    console.log(header);
-    console.log(divider);
-    console.log(result);
-    console.log(divider);
-    mainMenu();
-  });
+
+
+    })
+
 }
+
+
 
 //list products that have a quantity less than 5
 function listLowStockProducts(){
@@ -80,7 +105,6 @@ function listLowStockProducts(){
     console.log(divider);
     console.log(result);
     console.log(divider);
-    mainMenu();
   });
 }
 function addToInventory() {
@@ -141,7 +165,6 @@ function addProduct(item, department, quantity, price){
                                                   price}
     ], function(){
       console.log("NEW THING LISTED");
-      mainMenu();
     });
 };
 

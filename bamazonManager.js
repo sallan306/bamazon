@@ -22,10 +22,6 @@ connection.connect(function(err) {
 const divider = ` -----------------------------------------------------------------------------`,
       CLIconfig = { width: 100, filler: '.', paddingLeft: ' | ' , paddingRight: ' | '},
       header = cliFormat.columns.wrap(["NAME","DEPARTMENT","QUANTITY","PRICE"], CLIconfig)
-var newItemName = "",
-    newItemDepartment = "",
-    newItemQuantity = "",
-    newItemPrice = 0;
 //------------------------------------------------FUNCTIONS-------------------------------------------//
 
 //Opening function that begins by asking the user for the choices below
@@ -35,16 +31,16 @@ function mainMenu() {
                       message: "What would you like to do?",
                       choices: ["View Products for Sale",
                                 "View Low Inventory",
-                                "Add to Inventory (NOT FINISHED)" ,
+                                "Add to Inventory" ,
                                 "Add New Product",
                                 "Exit"]}
   ]).then(function(user) {
     const userC = user.UserChoicePrompt;
-    if      (userC === "View Products for Sale")                  {listAllProducts()}
-    else if (userC === "View Low Inventory")                      {listLowStockProducts()}
-    else if (userC === "Add to Inventory (NOT FINISHED)")         {addToInventory()} // NOT DONE
-    else if (userC === "Add New Product")                         {makeNewProduct()}   
-    else if (userC === "Exit")                                    {quit()}        
+    if      (userC === "View Products for Sale")  {listAllProducts()}
+    else if (userC === "View Low Inventory")      {listLowStockProducts()}
+    else if (userC === "Add to Inventory")        {addToInventory()}
+    else if (userC === "Add New Product")         {makeNewProduct()}   
+    else if (userC === "Exit")                    {quit()}        
   });
 }
 
@@ -83,7 +79,25 @@ function listLowStockProducts(){
     mainMenu();
   });
 }
+
+//adds extra quantity to the specified item
 function addToInventory() {
+
+  //shows the inventory
+  connection.query("SELECT * FROM products", function(err, res) {
+    if (err) throw err;
+    var result = ''
+
+    res.forEach(element => {
+          var price = element.price.toLocaleString("en-GB", {style: "currency", currency: "USD", minimumFractionDigits: 2})
+          result += cliFormat.columns.wrap([element.item,element.department,element.quantity.toString(),price], CLIconfig) + "\n";
+        })
+    console.log(header);
+    console.log(divider);
+    console.log(result);
+    console.log(divider);
+  });
+  //prompts the user of which item to add and for how much
   inquirer.prompt([{  type: "input",
                       name: "inquireItem",
                       message: "Which item would you like to add more of?"},
@@ -98,12 +112,14 @@ function addToInventory() {
       console.log("quantity before: "+result[0].quantity)
       sum = result[0].quantity + parseInt(response.inquireQuantity)
       console.log("sum: "+sum)
+      var query = "UPDATE products SET products.quantity = "+sum+" WHERE products.item = '"+response.inquireItem+"'"
+      connection.query(query, function(err,result){})
+      connection.query("SELECT quantity FROM products WHERE item = '"+response.inquireItem+"'", function(err,result) {
+        console.log("new amount: "+result[0].quantity)
+        mainMenu();
+      })
     })
-    var query = "UPDATE products SET products.quantity = "+sum+" WHERE products.item = '"+response.inquireItem+"'"
-    connection.query(query, function(err,result){})
-    connection.query("SELECT quantity FROM products WHERE item = '"+response.inquireItem+"'", function(err,result) {
-      console.log("new amount: "+result[0].quantity)
-    })
+
   })
 }
 //function that enters an inqurer input chain that gets an item name, department, quantity,
